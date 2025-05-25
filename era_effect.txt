@@ -1,68 +1,85 @@
-@name Yuma's ERA effect #YumaJero never died
+@name Yuma's ERA effect v1.1 #YumaJero
 @inputs Base:entity
-@outputs [Ar ArI ArA]:array E:entity
-@persist E:entity
+@outputs E:entity [Ar ArI ArA]:array
+@persist E:entity [Ar ArI ArA]:array I DONE
 @trigger E
 
 if(first()|dupefinished()){
     findIncludePlayerProps(owner())
-    findIncludeClass("prop_physics")
-    findInSphere(entity():pos(),600)
+    findInSphere(entity():pos(),6000)
     Ar=array() ArA=array() ArI=array()
-    for(I=1,findToArray():count()){
+    I=0 DONE=0
+}
+event tick() {
+    if(I<=findToArray():count()){
+        I++
         local Ent = findToArray()[I,entity]
         if(Ent:acfPropMaterial()=="ERA"){
             Ar:pushEntity(Ent)
-            ArI:pushVector(Base:toLocal(Ent:pos()))
-            ArA:pushAngle(Base:toLocal(Ent:angles()))
         }
     }
-    
-}
-
-interval(150)
-for(X=1,ArI:count()){
-    if(Ar[X,entity]==noentity()){
-        holoDeleteAll()
-        holoCreate(X,Base:toWorld(ArI[X,vector]),vec(),Base:toWorld(ArA[X,angle]),vec4()) holoParent(X,entity())
-        holoEntity(X):soundPlay(X,0,"acf_other/explosions/ambient/large/close/close7.mp3")
-        holoEntity(X):soundPlay("T"+X,0,"acf_other/explosions/ring/tinnitus.mp3")
-        E=holoEntity(X)
-        ArI:remove(X) ArA:remove(X) Ar:remove(X)
+    if(changed(I) & I==findToArray():count()){
+        timer("Sh2",25)
+        timer("Sh3",50)
+        print("renderdone"+I)
     }
 }
-if(changed(Ar:count())){
-    if(E:id()){
-        for(I=1,10){
-            particleCreate()
-            particleSetDuration(0.3)
-            particleCollision(0)
-            particleSetStartSize(10)
-            particleSetEndSize(100)
-            particleGravity(vec(0,0,5))
-            particleSetVelocity(E:up()*125)
-            particleSetPosition(E:toWorld(vec(random(-30,30),random(-30,30+I*0.1),0) ) )
-            particleSetStartAlpha(100)
-            particleSetEndAlpha(255)
-            particleSetPitch(random(0,360))
-            particleSetColor(vec(255,180,25))
-            particleSetMaterial("particles/smokey")
+if(clk("Sh2")){
+    print()
+    for(I=1,Ar:count()){
+        ArI:pushVector(Base:toLocal(Ar[I,entity]:pos()))
+    }
+}
+if(clk("Sh3")){
+    for(I=1,Ar:count()){
+        ArA:pushAngle(Base:toLocal(Ar[I,entity]:angles()))
+    }
+    DONE=1
+}
+if(DONE){
+    interval(150)
+    for(X=1,ArI:count()){
+        if(Ar[X,entity]==noentity()){
+            holoDeleteAll()
+            holoCreate(X,Base:toWorld(ArI[X,vector]),vec(),Base:toWorld(ArA[X,angle]),vec4()) holoParent(X,entity())
+            holoEntity(X):soundPlay(X,0,"acf_other/explosions/ambient/large/close/close7.mp3")
+            holoEntity(X):soundPlay("T"+X,0,"acf_other/explosions/ring/tinnitus.mp3")
+            E=holoEntity(X)
+            ArI:remove(X) ArA:remove(X) Ar:remove(X)
         }
-        for(I=1,35){
-            particleCreate()
-            particleSetDuration(15)
-            particleCollision(0)
-            particleSetStartSize(50)
-            particleSetEndSize(100000)
-            particleGravity(vec(0,0,-20))
-            particleSetVelocity(E:up()*55*random(0.1,1.5+I*0.01))
-            particleSetPosition(E:toWorld(vec(random(-75,75),random(-75,75),random(-75,75)) ) )
-            particleSetStartAlpha(255)
-            particleSetEndAlpha(100)
-            particleSetPitch(random(0,360))
-            particleSetColor(vec(50))
-            particleSetMaterial("particles/smokey")
+    }
+    if(changed(Ar:count())){
+        if(E:id()){
+            for(I=1,10){
+                particleCreate()
+                particleSetDuration(0.3)
+                particleCollision(0)
+                particleSetStartSize(10)
+                particleSetEndSize(100)
+                particleGravity(vec(0,0,5))
+                particleSetVelocity(E:up()*125)
+                particleSetPosition(E:toWorld(vec(random(-30,30),random(-30,30+I*0.1),0) ) )
+                particleSetStartAlpha(100)
+                particleSetEndAlpha(255)
+                particleSetPitch(random(0,360))
+                particleSetColor(vec(255,180,25))
+                particleSetMaterial("particles/smokey")
+            }
+            for(I=1,35){
+                particleCreate()
+                particleSetDuration(15)
+                particleCollision(0)
+                particleSetStartSize(50)
+                particleSetEndSize(100000)
+                particleGravity(vec(0,0,-20))
+                particleSetVelocity(E:up()*55*random(0.1,1.5+I*0.01))
+                particleSetPosition(E:toWorld(vec(random(-75,75),random(-75,75),random(-75,75)) ) )
+                particleSetStartAlpha(255)
+                particleSetEndAlpha(100)
+                particleSetPitch(random(0,360))
+                particleSetColor(vec(50))
+                particleSetMaterial("particles/smokey")
+            }
         }
     }
 }
-
